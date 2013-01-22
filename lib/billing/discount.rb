@@ -14,23 +14,49 @@ module Discount
     end
   end
 
+  module PercentageDiscount
+    def calculate(cart)
+      apply?(cart) ?  cart.total_price * @discount : 0
+    end
+
+    module ClassMethods
+      def discount(val)
+        @discount = val
+      end
+    end
+
+    def self.extended(base)
+      base.extend ClassMethods
+    end
+  end
+
   module Employee
-    def self.calculate(cart)
-      cart.user.employee? ? cart.total_price * 0.3 : 0
+    extend PercentageDiscount
+    discount 0.3
+
+    def self.apply?(cart)
+      cart.user.employee?
     end
   end
 
   module Affiliate
-    def self.calculate(cart)
-      cart.user.affiliate? ? cart.total_price * 0.1 : 0
+    extend PercentageDiscount
+    discount 0.1
+
+    def self.apply?(cart)
+      cart.user.affiliate?
     end
   end
 
   module OldCustomer
-    def self.calculate(cart)
+    extend PercentageDiscount
+    discount 0.05
+    YEAR_THRESHOLD = 2
+
+    def self.apply?(cart)
       today = Date.today
-      date_2_years_ago = Date.new(today.year - 2, today.month, today.day)
-      cart.user.start_date <= date_2_years_ago ? cart.total_price * 0.05 : 0
+      date_2_years_ago = Date.new(today.year - YEAR_THRESHOLD, today.month, today.day)
+      cart.user.start_date <= date_2_years_ago
     end
   end
 end
