@@ -2,10 +2,12 @@ require 'spec_helper'
 
 describe Billing do
   describe 'calculate payable amount' do
+    let(:customer){FactoryGirl.build(:customer)}
+
     context 'price based discounts ' do
       context 'when purchase price is less than $100' do
         let(:cart)do
-          FactoryGirl.build(:cart).tap do |cart|
+          FactoryGirl.build(:cart, :user => customer).tap do |cart|
             cart.add_item FactoryGirl.build(:item, :price => 30)
             cart.add_item FactoryGirl.build(:item, :price => 20)
           end
@@ -18,7 +20,7 @@ describe Billing do
 
       context 'price exceeds $100' do
         let(:cart)do
-          FactoryGirl.build(:cart).tap do |cart|
+          FactoryGirl.build(:cart, :user => customer).tap do |cart|
             cart.add_item FactoryGirl.build(:item, :price => 100)
             cart.add_item FactoryGirl.build(:item, :price => 120)
           end
@@ -40,15 +42,22 @@ describe Billing do
 
       context 'user is employee' do
         let(:employee){FactoryGirl.build(:employee)}
-        it 'should apply discount for an employee' do
+        it 'should apply 30% discount for an employee' do
           Billing.calculate(cart).should eql 42.0
         end
       end
 
       context 'user is affiliate' do
         let(:employee){FactoryGirl.build(:affiliate)}
-        it 'should apply discount for an employee' do
+        it 'should apply 10% discount for an employee' do
           Billing.calculate(cart).should eql 54.0
+        end
+      end
+
+      context 'user is customer' do
+        let(:employee){FactoryGirl.build(:old_customer)}
+        it 'should apply 5% discount when customer is older than 2 years' do
+          Billing.calculate(cart).should eql 57.0
         end
       end
     end

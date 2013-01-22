@@ -7,8 +7,9 @@ shared_examples "discount is not applicable" do
 end
 
 module Discount
-  describe Discount do 
+  describe Discount do
     let(:cart){stub(:cart, :total_price => 100, :user => user)}
+
     describe Price do
       let(:discount){Price}
       let(:user){FactoryGirl.build(:customer)}
@@ -44,8 +45,6 @@ module Discount
 
         it_should_behave_like 'discount is not applicable'
       end
-
-
     end
 
     describe Affiliate do
@@ -59,6 +58,23 @@ module Discount
       end
 
       context 'when user is non affiliate' do
+        let(:user){FactoryGirl.build(:customer)}
+
+        it_should_behave_like 'discount is not applicable'
+      end
+    end
+
+    describe OldCustomer do
+      let(:discount){OldCustomer}
+      context 'when user is an old customer' do
+        let(:user){FactoryGirl.build(:old_customer)}
+
+        it 'should apply a discount' do
+          OldCustomer.calculate(cart).should eql 5.0
+        end
+      end
+
+      context 'when user is new customer' do
         let(:user){FactoryGirl.build(:customer)}
 
         it_should_behave_like 'discount is not applicable'

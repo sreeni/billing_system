@@ -1,6 +1,6 @@
 module Discount
   def self.all
-    [Price, Employee, Affiliate]
+    [Price, Employee, Affiliate, OldCustomer]
   end
 
   module Price
@@ -23,6 +23,14 @@ module Discount
   module Affiliate
     def self.calculate(cart)
       cart.user.affiliate? ? cart.total_price * 0.1 : 0
+    end
+  end
+
+  module OldCustomer
+    def self.calculate(cart)
+      today = Date.today
+      date_2_years_ago = Date.new(today.year - 2, today.month, today.day)
+      cart.user.start_date <= date_2_years_ago ? cart.total_price * 0.05 : 0
     end
   end
 end
