@@ -1,4 +1,10 @@
 class ShoppingCart
+  attr_accessor :user
+
+  def initialize
+    @user = User.new
+  end
+
   def add_item(item)
     @items ||=[]
     @items << item

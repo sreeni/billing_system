@@ -29,5 +29,28 @@ describe Billing do
         end
       end
     end
+
+    context 'user based discounts' do
+      let(:cart) do
+        FactoryGirl.build(:cart, :user => employee).tap do |cart|
+          cart.add_item FactoryGirl.build(:item, :price => 50)
+          cart.add_item FactoryGirl.build(:item, :price => 10)
+        end
+      end
+
+      context 'user is employee' do
+        let(:employee){FactoryGirl.build(:employee)}
+        it 'should apply discount for an employee' do
+          Billing.calculate(cart).should eql 42.0
+        end
+      end
+
+      context 'user is affiliate' do
+        let(:employee){FactoryGirl.build(:affiliate)}
+        it 'should apply discount for an employee' do
+          Billing.calculate(cart).should eql 54.0
+        end
+      end
+    end
   end
 end
