@@ -1,5 +1,9 @@
 require "billing/version"
+require "billing/shopping_cart"
+require "billing/item"
 
 module Billing
-  # Your code goes here...
+  def self.calculate(cart)
+    cart.calculate
+  end
 end
