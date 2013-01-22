@@ -11,7 +11,6 @@ describe Billing do
       end
 
       it 'should calculate total payable' do
-        pending
         Billing.calculate(cart).should eql 50
       end
     end
