@@ -16,7 +16,14 @@ module Discount
 
   module PercentageDiscount
     def calculate(cart)
-      apply?(cart) ?  cart.total_price * @discount : 0
+      return 0 unless apply?(cart)
+      non_grocery_items = cart.items.reject do |item|
+        item.grocery?
+      end
+
+      non_grocery_items.map(&:price).inject(0) do |total, price|
+        total + @discount * price
+      end
     end
 
     module ClassMethods

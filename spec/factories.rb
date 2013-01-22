@@ -5,6 +5,11 @@ FactoryGirl.define do
   end
 
   factory :item, class: Item do
+    grocery false
+  end
+
+  factory :grocery_item, class: Item do
+    grocery true
   end
 
   factory :employee, class: User do

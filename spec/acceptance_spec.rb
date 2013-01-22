@@ -32,31 +32,45 @@ describe Billing do
       end
     end
 
-    context 'user based discounts' do
+    context 'percentage based discounts' do
       let(:cart) do
-        FactoryGirl.build(:cart, :user => employee).tap do |cart|
+        FactoryGirl.build(:cart, :user => user).tap do |cart|
           cart.add_item FactoryGirl.build(:item, :price => 50)
           cart.add_item FactoryGirl.build(:item, :price => 10)
         end
       end
 
       context 'user is employee' do
-        let(:employee){FactoryGirl.build(:employee)}
+        let(:user){FactoryGirl.build(:employee)}
         it 'should apply 30% discount for an employee' do
           Billing.calculate(cart).should eql 42.0
         end
       end
 
       context 'user is affiliate' do
-        let(:employee){FactoryGirl.build(:affiliate)}
+        let(:user){FactoryGirl.build(:affiliate)}
         it 'should apply 10% discount for an employee' do
           Billing.calculate(cart).should eql 54.0
         end
       end
 
       context 'user is customer' do
-        let(:employee){FactoryGirl.build(:old_customer)}
+        let(:user){FactoryGirl.build(:old_customer)}
         it 'should apply 5% discount when customer is older than 2 years' do
+          Billing.calculate(cart).should eql 57.0
+        end
+      end
+
+      context 'cart contains grocery items' do
+        let(:user){FactoryGirl.build(:employee)}
+        let(:cart) do
+          FactoryGirl.build(:cart, :user => user).tap do |cart|
+            cart.add_item FactoryGirl.build(:grocery_item, :price => 50)
+            cart.add_item FactoryGirl.build(:item, :price => 10)
+          end
+        end
+
+        it 'should apply discount only on non-grocery items' do
           Billing.calculate(cart).should eql 57.0
         end
       end

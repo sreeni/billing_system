@@ -1,5 +1,6 @@
 class ShoppingCart
   attr_accessor :user
+  attr_accessor :items
 
   def add_item(item)
     @items ||=[]

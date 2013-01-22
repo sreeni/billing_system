@@ -8,7 +8,15 @@ end
 
 module Discount
   describe Discount do
-    let(:cart){stub(:cart, :total_price => 100, :user => user)}
+    let(:items) do
+      [
+        FactoryGirl.build(:item, :price => 100),
+      ]
+    end
+
+    let(:cart)do
+      FactoryGirl.build(:cart, :user => user, :items => items)
+    end
 
     describe Price do
       let(:discount){Price}
@@ -29,55 +37,77 @@ module Discount
       end
     end
 
-    describe Employee do
-      let(:discount){Employee}
+    describe 'percentage discounts' do
 
-      context 'when user is employee' do
-        let(:user){FactoryGirl.build(:employee)}
+      describe Employee do
+        let(:discount){Employee}
 
-        it 'should apply a discount' do
-          Employee.calculate(cart).should eql 30.0
+        context 'when user is employee' do
+          let(:user){FactoryGirl.build(:employee)}
+
+          it 'should apply a discount' do
+            Employee.calculate(cart).should eql 30.0
+          end
+        end
+
+        context 'when user is non employee' do
+          let(:user){FactoryGirl.build(:customer)}
+
+          it_should_behave_like 'discount is not applicable'
+        end
+
+        context 'when cart contains grocery items' do
+          let(:user){FactoryGirl.build(:employee)}
+
+          let(:items) do
+            [
+              FactoryGirl.build(:item, :price => 10),
+              FactoryGirl.build(:grocery_item, :price => 20)
+            ]
+          end
+
+          let(:cart) do
+            stub(:cart, :total_price => 30, :user => user, :items => items)
+          end
+
+          it 'should not apply discount for grocery items' do
+            Employee.calculate(cart).should eql 3.0
+          end
         end
       end
 
-      context 'when user is non employee' do
-        let(:user){FactoryGirl.build(:customer)}
+      describe Affiliate do
+        let(:discount){Affiliate}
+        context 'when user is an affiliate' do
+          let(:user){FactoryGirl.build(:affiliate)}
 
-        it_should_behave_like 'discount is not applicable'
-      end
-    end
+          it 'should apply a discount' do
+            Affiliate.calculate(cart).should eql 10.0
+          end
+        end
 
-    describe Affiliate do
-      let(:discount){Affiliate}
-      context 'when user is an affiliate' do
-        let(:user){FactoryGirl.build(:affiliate)}
+        context 'when user is non affiliate' do
+          let(:user){FactoryGirl.build(:customer)}
 
-        it 'should apply a discount' do
-          Affiliate.calculate(cart).should eql 10.0
+          it_should_behave_like 'discount is not applicable'
         end
       end
 
-      context 'when user is non affiliate' do
-        let(:user){FactoryGirl.build(:customer)}
+      describe OldCustomer do
+        let(:discount){OldCustomer}
+        context 'when user is an old customer' do
+          let(:user){FactoryGirl.build(:old_customer)}
 
-        it_should_behave_like 'discount is not applicable'
-      end
-    end
-
-    describe OldCustomer do
-      let(:discount){OldCustomer}
-      context 'when user is an old customer' do
-        let(:user){FactoryGirl.build(:old_customer)}
-
-        it 'should apply a discount' do
-          OldCustomer.calculate(cart).should eql 5.0
+          it 'should apply a discount' do
+            OldCustomer.calculate(cart).should eql 5.0
+          end
         end
-      end
 
-      context 'when user is new customer' do
-        let(:user){FactoryGirl.build(:customer)}
+        context 'when user is new customer' do
+          let(:user){FactoryGirl.build(:customer)}
 
-        it_should_behave_like 'discount is not applicable'
+          it_should_behave_like 'discount is not applicable'
+        end
       end
     end
   end
