@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Billing do
+describe 'Billing System' do
   describe 'calculate payable amount' do
     let(:customer){FactoryGirl.build(:customer)}
 
@@ -49,7 +49,7 @@ describe Billing do
 
       context 'user is affiliate' do
         let(:user){FactoryGirl.build(:affiliate)}
-        it 'should apply 10% discount for an employee' do
+        it 'should apply 10% discount for an affiliate' do
           Billing.calculate(cart).should eql 54.0
         end
       end
@@ -72,6 +72,22 @@ describe Billing do
 
         it 'should apply discount only on non-grocery items' do
           Billing.calculate(cart).should eql 57.0
+        end
+      end
+
+      context 'when multiple discounts are possible' do
+        context 'when user is employee and an old customer' do
+          let(:user){FactoryGirl.build(:employee)}
+          let(:cart) do
+            FactoryGirl.build(:cart, :user => user).tap do |cart|
+              cart.add_item FactoryGirl.build(:item, :price => 100)
+            end
+          end
+
+          it 'should only apply a single percentage discount' do
+            user.stub(:affiliate? => true)
+            Billing.calculate(cart).should eql 65.0
+          end
         end
       end
     end

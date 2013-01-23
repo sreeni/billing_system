@@ -41,6 +41,15 @@ module Discount
           Price.calculate(cart).should eql 15
         end
       end
+
+      context 'when price is equal to $100' do
+        let(:item_price){100}
+        it_should_behave_like 'discount is applicable'
+
+        it 'should apply $5 discount on every $100' do
+          Price.calculate(cart).should eql 5
+        end
+      end
     end
 
     describe PercentageDiscount do

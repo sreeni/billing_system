@@ -12,13 +12,16 @@ module Discount
     end
 
     def self.applicable?(cart)
-      cart.total_price > THRESHOLD
+      cart.total_price >= THRESHOLD
+    end
+
+    def self.type
+      :price
     end
   end
 
   module PercentageDiscount
     def calculate(cart)
-      p self
       non_grocery_items = cart.items.reject do |item|
         item.grocery?
       end
@@ -26,6 +29,10 @@ module Discount
       non_grocery_items.map(&:price).inject(0) do |total, price|
         total + @discount * price
       end
+    end
+
+    def type
+      :percentage
     end
 
     module ClassMethods
