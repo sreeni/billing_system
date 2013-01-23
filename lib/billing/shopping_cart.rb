@@ -9,7 +9,8 @@ class ShoppingCart
 
   def calculate(discounts)
     total_price - discounts.inject(0) do |total , discount|
-      discount.calculate(self) + total
+      discount = discount.applicable?(self) ?  discount.calculate(self) : 0
+      discount + total
     end
   end
 

@@ -8,15 +8,17 @@ module Discount
     DISCOUNT = 5
     def self.calculate(cart)
       total_price = cart.total_price
-      return 0 if total_price < THRESHOLD
-
       DISCOUNT * (total_price - total_price % THRESHOLD) / THRESHOLD
+    end
+
+    def self.applicable?(cart)
+      cart.total_price > THRESHOLD
     end
   end
 
   module PercentageDiscount
     def calculate(cart)
-      return 0 unless apply?(cart)
+      p self
       non_grocery_items = cart.items.reject do |item|
         item.grocery?
       end
@@ -27,7 +29,7 @@ module Discount
     end
 
     module ClassMethods
-      def discount(val)
+      def set_discount(val)
         @discount = val
       end
     end
@@ -39,28 +41,28 @@ module Discount
 
   module Employee
     extend PercentageDiscount
-    discount 0.3
+    set_discount 0.3
 
-    def self.apply?(cart)
+    def self.applicable?(cart)
       cart.user.employee?
     end
   end
 
   module Affiliate
     extend PercentageDiscount
-    discount 0.1
+    set_discount 0.1
 
-    def self.apply?(cart)
+    def self.applicable?(cart)
       cart.user.affiliate?
     end
   end
 
   module OldCustomer
     extend PercentageDiscount
-    discount 0.05
+    set_discount 0.05
     YEAR_THRESHOLD = 2
 
-    def self.apply?(cart)
+    def self.applicable?(cart)
       today = Date.today
       date_2_years_ago = Date.new(today.year - YEAR_THRESHOLD, today.month, today.day)
       cart.user.start_date <= date_2_years_ago
